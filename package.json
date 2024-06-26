@@ -1,15 +1,14 @@
 {
-  "name": "@capgo/camera-preview",
+  "name": "@exapps/camera-preview",
   "version": "6.2.21",
   "description": "Camera preview",
-  "author": "Martin Donadieu <martindonadieu@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Cap-go/camera-preview.git"
+    "url": "https://github.com/wijzijnweb/camera-preview.git"
   },
   "bugs": {
-    "url": "https://github.com/Cap-go/camera-preview/issues"
+    "url": "https://github.com/wijzijnweb/camera-preview/issues"
   },
   "keywords": [
     "capacitor",
@@ -19,7 +18,7 @@
   "main": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
   "files": [
-    "CapgoCameraPreview.podspec",
+    "ExappsCameraPreview.podspec",
     "android/",
     "dist/",
     "ios/"
@@ -38,7 +37,6 @@
     "clean": "rimraf ./dist",
     "watch": "tsc --watch",
     "docgen": "docgen --api CameraPreviewPlugin --output-readme README.md --output-json dist/docs.json",
-    "prepublishOnly": "npm run build",
     "prepare": "husky install"
   },
   "peerDependencies": {
