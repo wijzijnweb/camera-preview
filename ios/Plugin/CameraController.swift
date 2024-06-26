@@ -19,6 +19,9 @@ class CameraController: NSObject {
 
     var dataOutput: AVCaptureVideoDataOutput?
     var photoOutput: AVCapturePhotoOutput?
+    
+    var movieFileOutput: AVCaptureMovieFileOutput?
+    var videoRecordCompletionBlock: ((URL?, Error?) -> Void)?
 
     var rearCamera: AVCaptureDevice?
     var rearCameraInput: AVCaptureDeviceInput?
@@ -423,24 +426,34 @@ extension CameraController {
 
     }
 
-    func captureVideo() throws {
+    func captureVideo(completion: @escaping (URL?, Error?) -> Void) throws {
         guard let captureSession = self.captureSession, captureSession.isRunning else {
             throw CameraControllerError.captureSessionIsMissing
         }
-        let path = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-        let identifier = UUID()
-        let randomIdentifier = identifier.uuidString.replacingOccurrences(of: "-", with: "")
-        let finalIdentifier = String(randomIdentifier.prefix(8))
-        let fileName="cpcp_video_"+finalIdentifier+".mp4"
 
-        let fileUrl = path.appendingPathComponent(fileName)
-        try? FileManager.default.removeItem(at: fileUrl)
+        self.movieFileOutput = AVCaptureMovieFileOutput()
+        
+        if let movieFileOutput = self.movieFileOutput {
+            
+            if captureSession.canAddOutput(movieFileOutput) {
+                captureSession.addOutput(movieFileOutput)
+                
+                let path = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
+                let identifier = UUID()
+                let randomIdentifier = identifier.uuidString.replacingOccurrences(of: "-", with: "")
+                let finalIdentifier = String(randomIdentifier.prefix(8))
+                let fileName="cpcp_video_"+finalIdentifier+".mp4"
+                
+                let fileUrl = path.appendingPathComponent(fileName)
+                try? FileManager.default.removeItem(at: fileUrl)
+                
+                movieFileOutput.startRecording(to: fileUrl, recordingDelegate: self)
+            } else {
+                throw CameraControllerError.unknown
+            }
+        }
 
-        // Start recording video
-        // ...
-
-        // Save the file URL for later use
-        self.videoFileURL = fileUrl
+      
     }
 
     func stopRecording(completion: @escaping (URL?, Error?) -> Void) {
@@ -448,11 +461,43 @@ extension CameraController {
             completion(nil, CameraControllerError.captureSessionIsMissing)
             return
         }
-        // Stop recording video
-        // ...
 
-        // Return the video file URL in the completion handler
-        completion(self.videoFileURL, nil)
+        self.videoRecordCompletionBlock = completion
+        
+        
+        if(self.movieFileOutput != nil) {
+            print("stopping")
+            self.movieFileOutput?.stopRecording() // Stop recording
+            print("stopped")
+        } else {
+            completion(nil, CameraControllerError.unknown)
+        }
+    }
+}
+
+
+extension CameraController: AVCaptureFileOutputRecordingDelegate {
+    func fileOutput(_ output: AVCaptureFileOutput,
+                        didStartRecordingTo fileURL: URL,
+                        from connections: [AVCaptureConnection]) {
+            // Code to execute when the recording starts
+            print("Started recording to \(fileURL.absoluteString)")
+        }
+    
+    func fileOutput(_ output: AVCaptureFileOutput,
+                    didFinishRecordingTo outputFileURL: URL,
+                    from connections: [AVCaptureConnection],
+                    error: Error?) {
+        // Code to execute when the recording finishes
+        
+        print("stopping")
+        
+        if let error = error {
+            print("Error recording movie: \(error.localizedDescription)")
+        } else {
+            print("Successfully recorded movie to \(outputFileURL.absoluteString)")
+            self.videoRecordCompletionBlock?(outputFileURL, nil)
+        }
     }
 }
 
@@ -674,14 +719,4 @@ extension UIImage {
         guard let newCGImage = ctx.makeImage() else { return nil }
         return UIImage.init(cgImage: newCGImage, scale: 1, orientation: .up)
     }
-}
-
-extension CameraController: AVCaptureFileOutputRecordingDelegate {
-    func fileOutput(_ output: AVCaptureFileOutput, didFinishRecordingTo outputFileURL: URL, from connections: [AVCaptureConnection], error: Error?) {
-        /*if error == nil {
-         self.videoRecordCompletionBlock?(outputFileURL, nil)
-         } else {
-         self.videoRecordCompletionBlock?(nil, error)
-         }*/
-    }
-}
+}   
