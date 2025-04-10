@@ -19,6 +19,10 @@ apply plugin: 'com.android.library'
 
 android {
     namespace "com.ahm.capacitor.camera.preview.capacitorcamerapreview"
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
     compileSdk project.hasProperty('compileSdkVersion') ? rootProject.ext.compileSdkVersion : 35
     defaultConfig {
         minSdkVersion project.hasProperty('minSdkVersion') ? rootProject.ext.minSdkVersion : 22
