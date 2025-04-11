@@ -1,6 +1,6 @@
 {
   "name": "@exapps/camera-preview",
-  "version": "7.2.3",
+  "version": "7.2.4",
   "description": "Camera preview",
   "license": "MIT",
   "repository": {
@@ -40,7 +40,7 @@
     "prepare": "husky install"
   },
   "peerDependencies": {
-    "@capacitor/core": "^7.2.0"
+    "@capacitor/core": ">=7.0.0"
   },
   "dependencies": {},
   "devDependencies": {
